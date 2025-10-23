@@ -1,11 +1,12 @@
 name: "🧩 Feature Request"
-title: "[Feature] {{ title }}"
 description: "Describe the new feature you’d like to add to OpenHudle."
+title: "[Feature] {{ title }}"
 body:
   - type: markdown
-    text: |
-      ## 🎯 Summary
-      A concise description of the feature.
+    attributes:
+      value: |
+        ## 🎯 Summary
+        A concise description of the feature.
   - type: textarea
     id: user_story
     attributes:
