@@ -1,0 +1,297 @@
+# .github/projects/openhudle.yml
+# 🏈 OpenHudle – GitHub Projects Configuration
+# This file sets up project views, columns, and automated workflows for the OpenHudle roadmap.
+
+name: OpenHudle
+description: >
+  OpenHudle is an open-source, full-stack video analysis and collaboration platform for sports teams,
+  inspired by Hudl. Built with Next.js 16, Prisma, AWS, and modern real-time collaboration tools.
+
+# 👇 Project Metadata
+version: 1
+public: true
+owner: Deniz Gunes
+
+# 📦 Project Fields
+fields:
+  - name: Priority
+    data_type: single_select
+    options:
+      - name: 🔴 High
+        color: RED
+      - name: 🟡 Medium
+        color: YELLOW
+      - name: 🟢 Low
+        color: GREEN
+
+  - name: Status
+    data_type: single_select
+    options:
+      - name: 🧠 Backlog
+        color: GRAY
+      - name: 🚧 In Progress
+        color: BLUE
+      - name: ✅ Done
+        color: GREEN
+      - name: ❌ Blocked
+        color: RED
+
+  - name: Sprint
+    data_type: single_select
+    options:
+      - name: Sprint 1 – Foundation
+      - name: Sprint 2 – Teams & Permissions
+      - name: Sprint 3 – Video Player & Annotations
+      - name: Sprint 4 – Clips & Tagging
+      - name: Sprint 5 – Playbook & Analytics
+      - name: Sprint 6 – Polish & Scale
+
+  - name: Area
+    data_type: single_select
+    options:
+      - name: Frontend
+      - name: Backend
+      - name: Infrastructure
+      - name: Video Processing
+      - name: Realtime
+      - name: Auth
+      - name: Database
+      - name: Documentation
+
+# 🧩 Columns (Kanban Workflow)
+views:
+  - name: Development Board
+    type: board
+    filter: "Status"
+    columns:
+      - name: Backlog
+        filter: "Status: 🧠 Backlog"
+      - name: In Progress
+        filter: "Status: 🚧 In Progress"
+      - name: Review
+        filter: "Status: 🚧 In Progress"
+      - name: Done
+        filter: "Status: ✅ Done"
+      - name: Blocked
+        filter: "Status: ❌ Blocked"
+
+  - name: Roadmap
+    type: table
+    filter: "Sprint"
+    layout:
+      - field: Sprint
+      - field: Priority
+      - field: Status
+      - field: Area
+
+  - name: Sprint Progress
+    type: roadmap
+    filter: "Sprint"
+    layout:
+      - group_by: Sprint
+      - sort_by: Priority
+
+# ⚙️ Automations
+automations:
+  - name: Auto Move to "Done"
+    event: issues.closed
+    action:
+      type: set_field
+      field: Status
+      value: ✅ Done
+
+  - name: Auto Move to "In Progress"
+    event: issues.reopened
+    action:
+      type: set_field
+      field: Status
+      value: 🚧 In Progress
+
+  - name: Auto Assign Sprint
+    event: issues.opened
+    action:
+      type: set_field
+      field: Sprint
+      value: Sprint 1 – Foundation
+
+# 🗂️ Issue Templates
+templates:
+  - name: 🧩 Feature Request
+    title: "[Feature] {{ title }}"
+    description: >
+      Describe the new feature you’d like to add to OpenHudle.
+    body:
+      - type: markdown
+        text: |
+          ## 🎯 Summary
+          A concise description of the feature.
+      - type: textarea
+        id: user_story
+        attributes:
+          label: User Story
+          description: "As a [user], I want to [goal] so that [reason]."
+      - type: dropdown
+        id: sprint
+        attributes:
+          label: Sprint
+          options:
+            - Sprint 1 – Foundation
+            - Sprint 2 – Teams & Permissions
+            - Sprint 3 – Video Player & Annotations
+            - Sprint 4 – Clips & Tagging
+            - Sprint 5 – Playbook & Analytics
+            - Sprint 6 – Polish & Scale
+      - type: dropdown
+        id: area
+        attributes:
+          label: Area
+          options:
+            - Frontend
+            - Backend
+            - Infrastructure
+            - Video Processing
+            - Realtime
+            - Auth
+            - Database
+            - Documentation
+      - type: dropdown
+        id: priority
+        attributes:
+          label: Priority
+          options:
+            - 🔴 High
+            - 🟡 Medium
+            - 🟢 Low
+      - type: textarea
+        id: acceptance_criteria
+        attributes:
+          label: Acceptance Criteria
+          description: "List what conditions must be met for this feature to be considered complete."
+
+  - name: 🐞 Bug Report
+    title: "[Bug] {{ title }}"
+    description: >
+      Report a reproducible issue within the OpenHudle platform.
+    body:
+      - type: markdown
+        text: |
+          ## 🐛 Bug Summary
+      - type: textarea
+        id: bug_description
+        attributes:
+          label: Description
+          placeholder: "Describe the bug in detail."
+      - type: textarea
+        id: steps
+        attributes:
+          label: Steps to Reproduce
+          placeholder: "1. Go to ... 2. Click on ... 3. See error"
+      - type: textarea
+        id: expected
+        attributes:
+          label: Expected Behavior
+          placeholder: "What should have happened?"
+      - type: textarea
+        id: actual
+        attributes:
+          label: Actual Behavior
+          placeholder: "What actually happened?"
+      - type: dropdown
+        id: sprint
+        attributes:
+          label: Sprint
+          options:
+            - Sprint 1 – Foundation
+            - Sprint 2 – Teams & Permissions
+            - Sprint 3 – Video Player & Annotations
+            - Sprint 4 – Clips & Tagging
+            - Sprint 5 – Playbook & Analytics
+            - Sprint 6 – Polish & Scale
+      - type: dropdown
+        id: priority
+        attributes:
+          label: Priority
+          options:
+            - 🔴 High
+            - 🟡 Medium
+            - 🟢 Low
+
+  - name: 🧪 Task
+    title: "[Task] {{ title }}"
+    description: "General task for backend, frontend, or documentation work."
+    body:
+      - type: dropdown
+        id: area
+        attributes:
+          label: Area
+          options:
+            - Frontend
+            - Backend
+            - Infrastructure
+            - Video Processing
+            - Realtime
+            - Auth
+            - Database
+            - Documentation
+      - type: textarea
+        id: description
+        attributes:
+          label: Description
+          placeholder: "Describe what this task entails."
+      - type: dropdown
+        id: sprint
+        attributes:
+          label: Sprint
+          options:
+            - Sprint 1 – Foundation
+            - Sprint 2 – Teams & Permissions
+            - Sprint 3 – Video Player & Annotations
+            - Sprint 4 – Clips & Tagging
+            - Sprint 5 – Playbook & Analytics
+            - Sprint 6 – Polish & Scale
+      - type: dropdown
+        id: priority
+        attributes:
+          label: Priority
+          options:
+            - 🔴 High
+            - 🟡 Medium
+            - 🟢 Low
+      - type: textarea
+        id: acceptance_criteria
+        attributes:
+          label: Acceptance Criteria
+          placeholder: "Describe what defines completion."
+
+  - name: 🧱 Epic
+    title: "[Epic] {{ title }}"
+    description: >
+      High-level milestone containing multiple related features or tasks.
+    body:
+      - type: markdown
+        text: |
+          ## 🧱 Epic Overview
+      - type: textarea
+        id: goals
+        attributes:
+          label: Goals
+          placeholder: "What is this epic trying to achieve?"
+      - type: textarea
+        id: deliverables
+        attributes:
+          label: Deliverables
+          placeholder: "What will be delivered by the end of this epic?"
+      - type: dropdown
+        id: sprint
+        attributes:
+          label: Sprint
+          options:
+            - Sprint 1 – Foundation
+            - Sprint 2 – Teams & Permissions
+            - Sprint 3 – Video Player & Annotations
+            - Sprint 4 – Clips & Tagging
+            - Sprint 5 – Playbook & Analytics
+            - Sprint 6 – Polish & Scale
+
+# ✅ Default Filters for New Views
+default_view: Development Board
