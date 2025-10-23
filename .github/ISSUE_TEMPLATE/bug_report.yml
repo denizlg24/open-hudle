@@ -1,0 +1,50 @@
+name: "🐞 Bug Report"
+description: "Report a reproducible issue within the OpenHudle platform."
+title: "[Bug] {{ title }}"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🐛 Bug Summary
+  - type: textarea
+    id: bug_description
+    attributes:
+      label: Description
+      placeholder: "Describe the bug in detail."
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      placeholder: |
+        1. Go to ...
+        2. Click on ...
+        3. See error
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      placeholder: "What should have happened?"
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      placeholder: "What actually happened?"
+  - type: dropdown
+    id: sprint
+    attributes:
+      label: Sprint
+      options:
+        - Sprint 1 – Foundation
+        - Sprint 2 – Teams & Permissions
+        - Sprint 3 – Video Player & Annotations
+        - Sprint 4 – Clips & Tagging
+        - Sprint 5 – Playbook & Analytics
+        - Sprint 6 – Polish & Scale
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - 🔴 High
+        - 🟡 Medium
+        - 🟢 Low
