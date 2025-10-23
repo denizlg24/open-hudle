@@ -1,5 +1,5 @@
-- name: 🧩 Feature Request
-    title: "[Feature] "
+    name: 🧩 Feature Request
+    title: "Feature: {{ title }} "
     description: >
       Describe the new feature you’d like to add to OpenHudle.
     body:
