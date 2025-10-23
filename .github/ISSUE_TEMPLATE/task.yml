@@ -1,0 +1,46 @@
+name: "🧪 Task"
+description: "General task for backend, frontend, or documentation work."
+title: "[Task] {{ title }}"
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Frontend
+        - Backend
+        - Infrastructure
+        - Video Processing
+        - Realtime
+        - Auth
+        - Database
+        - Documentation
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      placeholder: "Describe what this task entails."
+  - type: dropdown
+    id: sprint
+    attributes:
+      label: Sprint
+      options:
+        - Sprint 1 – Foundation
+        - Sprint 2 – Teams & Permissions
+        - Sprint 3 – Video Player & Annotations
+        - Sprint 4 – Clips & Tagging
+        - Sprint 5 – Playbook & Analytics
+        - Sprint 6 – Polish & Scale
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - 🔴 High
+        - 🟡 Medium
+        - 🟢 Low
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: Acceptance Criteria
+      placeholder: "Describe what defines completion."
