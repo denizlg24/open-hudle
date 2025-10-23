@@ -1,0 +1,29 @@
+name: "🧱 Epic"
+description: "High-level milestone containing multiple related features or tasks."
+title: "[Epic] {{ title }}"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🧱 Epic Overview
+  - type: textarea
+    id: goals
+    attributes:
+      label: Goals
+      placeholder: "What is this epic trying to achieve?"
+  - type: textarea
+    id: deliverables
+    attributes:
+      label: Deliverables
+      placeholder: "What will be delivered by the end of this epic?"
+  - type: dropdown
+    id: sprint
+    attributes:
+      label: Sprint
+      options:
+        - Sprint 1 – Foundation
+        - Sprint 2 – Teams & Permissions
+        - Sprint 3 – Video Player & Annotations
+        - Sprint 4 – Clips & Tagging
+        - Sprint 5 – Playbook & Analytics
+        - Sprint 6 – Polish & Scale
