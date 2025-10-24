@@ -1,6 +1,6 @@
 # 🏈 OpenHudle – Video Analysis Platform for Teams
 
-> An open-source video analysis and team collaboration platform inspired by Hudl — built for coaches, players, and analysts who want full control over their footage and data.
+> A video analysis and team collaboration platform inspired by Hudl — built for coaches, players, and analysts who want full control over their footage and data.
 
 ---
 
@@ -182,11 +182,6 @@ For reliable annotations across all screens:
 - **SVG Overlay (custom)** → Perfect scaling on any device, ideal for static diagrams
 
 Save drawings as **JSON state objects**, and replay using video timestamps. This guarantees the same drawings appear across all devices and resolutions.
-
----
-
-## 📜 License
-MIT License — free for teams, open-source for the community.
 
 ---
 
