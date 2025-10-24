@@ -16,19 +16,18 @@ OpenHudle allows sports teams to **upload, analyze, and share practice and game 
 - **Framework:** Next.js 16 (React 19 compiler, async caching, server actions)
 - **Language:** TypeScript
 - **UI:** Shadcn/UI + Tailwind CSS + Framer Motion
-- **State Management:** Zustand or React Context + Server Components
-- **Video Player:** Custom player using [Video.js](https://videojs.com/) or [Remotion Player]
-- **Drawing Layer:** Fabric.js or Konva.js (Canvas-based annotations)
-
+- **State Management:** Zustand + Server Components
+- **Video Player:** Custom player using [Remotion Player](https://www.remotion.dev)
+- **Drawing Layer:** Konva.js
 ### **Backend**
 - **Runtime:** Next.js Server Actions / Edge Runtime
 - **ORM:** Prisma
-- **Database:** PostgreSQL (with connection pooling via Prisma Accelerate or Supabase)
+- **Database:** PostgreSQL (with connection pooling via Prisma Accelerate)
 - **Auth:** NextAuth.js (Email + Google + Team invitation links)
 - **File Storage:** AWS S3 (for raw + processed videos)
 - **Transcoding:** AWS Lambda + FFmpeg (automated video optimization)
-- **Real-Time:** WebSockets or Pusher (for comments, live drawing sync)
-- **Background Jobs:** BullMQ (Redis-based) or Cloudflare Queues (for async video processing)
+- **Real-Time:** WebSockets (for comments, live drawing sync)
+- **Background Jobs:** BullMQ (Redis-based)
 - **Analytics:** Clickhouse (optional) or PostgreSQL rollups for views/plays
 
 ### **Infrastructure**
@@ -180,7 +179,6 @@ OpenHudle allows sports teams to **upload, analyze, and share practice and game 
 
 For reliable annotations across all screens:
 - **Konva.js** → Canvas-based, scalable drawings with serialization (recommended)
-- **Fabric.js** → Richer features, easier freehand tools, snapshot saving
 - **SVG Overlay (custom)** → Perfect scaling on any device, ideal for static diagrams
 
 Save drawings as **JSON state objects**, and replay using video timestamps. This guarantees the same drawings appear across all devices and resolutions.
