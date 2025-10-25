@@ -1,187 +1,241 @@
 # 🏈 OpenHudle – Video Analysis Platform for Teams
 
-> A video analysis and team collaboration platform inspired by Hudl — built for coaches, players, and analysts who want full control over their footage and data.
+> A distributed, high-performance video analysis and collaboration platform inspired by Hudl — designed for teams that want **full control**, **modularity**, and **scalability**.
 
 ---
 
 ## 🧠 Project Vision
 
-OpenHudle allows sports teams to **upload, analyze, and share practice and game footage** seamlessly. Coaches can draw over plays, tag players, share clips, and generate insights — all in a fast, intuitive interface designed with performance and collaboration in mind.
+OpenHudle empowers sports teams to **upload, analyze, and collaborate on practice and game footage** in real time.  
+It’s open, extensible, and cloud-native — built with scalability, modularity, and maintainability in mind.
 
 ---
 
-## ⚙️ Architecture Overview
+## ⚙️ Microservices Architecture Overview
 
-### **Frontend**
-- **Framework:** Next.js 16 (React 19 compiler, async caching, server actions)
-- **Language:** TypeScript
-- **UI:** Shadcn/UI + Tailwind CSS + Framer Motion
-- **State Management:** Zustand + Server Components
-- **Video Player:** Custom player using [Remotion Player](https://www.remotion.dev)
-- **Drawing Layer:** Konva.js
-### **Backend**
-- **Runtime:** Next.js Server Actions / Edge Runtime
-- **ORM:** Prisma
-- **Database:** PostgreSQL (with connection pooling via Prisma Accelerate)
-- **Auth:** NextAuth.js (Email + Google + Team invitation links)
-- **File Storage:** AWS S3 (for raw + processed videos)
-- **Transcoding:** AWS Lambda + FFmpeg (automated video optimization)
-- **Real-Time:** WebSockets (for comments, live drawing sync)
-- **Background Jobs:** BullMQ (Redis-based)
-- **Analytics:** Clickhouse (optional) or PostgreSQL rollups for views/plays
+Instead of a monolithic backend, OpenHudle is composed of **independent services** connected via **an event-driven architecture**.
 
-### **Infrastructure**
-- **CDN:** CloudFront or Cloudflare R2
-- **Deployment:** Vercel (Frontend) + AWS Lambda (Processing) + Railway / Supabase (DB)
-- **Monitoring:** Sentry + Logflare
-- **CI/CD:** GitHub Actions (lint, test, deploy)
+Each service is containerized (Docker) and communicates through a lightweight message broker (e.g., **Redis Streams**, **NATS**, or **Kafka**).  
+The frontend communicates with a **Gateway API** that routes and authenticates all requests.
 
 ---
 
-## 🧩 Core Features
+### 🧩 Service Breakdown
 
-| Category | Description |
-|-----------|-------------|
-| **Video Upload & Playback** | Upload game/practice videos, auto-transcoded to streamable formats |
-| **Annotation Layer** | Draw arrows, circles, and text directly on top of videos |
-| **Clip Creation** | Trim and save specific video moments as clips |
-| **Team Management** | Add players, coaches, assign roles and permissions |
-| **Comment System** | Timestamped comments under videos or clips |
-| **Playbook Mode** | Save annotated clips into categorized playbooks |
-| **Tagging System** | Tag players, plays, formations, and results |
-| **Analytics Dashboard** | Stats on clips, tags, player engagement |
-| **Sharing** | Generate private or team-only share links |
-| **Offline Notes (optional)** | Download videos for offline review (future) |
+#### **1. Frontend (Next.js 16)**
+- **Stack:** Next.js 16, TypeScript, Shadcn/UI, Tailwind, Zustand
+- **Responsibilities:**
+  - UI, routing, and client interactions
+  - Calls the API Gateway for all backend interactions
+  - Manages real-time events via WebSockets
+  - Video player, annotation layer, and dashboard rendering
+- **Deployment:** Vercel or Docker container behind CDN
 
----
+#### **2. API Gateway**
+- **Stack:** Fastify + TypeScript or Next.js Edge API Routes
+- **Responsibilities:**
+  - Entry point for all client traffic
+  - Auth validation via shared JWT
+  - Routes traffic to internal microservices
+  - Rate limiting, caching, and load balancing
+- **Deployment:** AWS Lambda / Cloudflare Workers / Docker
 
-## 🎯 User Stories
+#### **3. Auth Service**
+- **Stack:** Node.js (Fastify) + PostgreSQL + Prisma
+- **Responsibilities:**
+  - User registration, login, OAuth (Google, email)
+  - Team and role management
+  - JWT / session issuing for other services
+  - Invitation links
+- **Communication:** REST + internal event bus
+- **Storage:** PostgreSQL (Supabase / Railway)
 
-### **1. Authentication & Team Setup**
-- As a coach, I want to create an account and start a new team.
-- As a coach, I want to invite players and assistant coaches via email.
-- As a player, I want to join a team from an invite link.
-- As a user, I want to log in using Google or email.
+#### **4. Media Service**
+- **Stack:** Node.js + AWS SDK + FFmpeg + Prisma
+- **Responsibilities:**
+  - File uploads (to S3)
+  - Video transcoding (via AWS Lambda)
+  - Generate thumbnails and previews
+  - Manage video metadata and storage lifecycle
+- **Communication:** Message queue for processing
+- **Storage:** AWS S3 + PostgreSQL
 
-### **2. Video Management**
-- As a coach, I can upload raw game footage.
-- As a player, I can view videos uploaded by my coach.
-- As the system, I should transcode videos automatically to optimized formats.
-- As a user, I can stream videos seamlessly on any device.
-- As a coach, I can categorize videos (practice, game, special teams).
+#### **5. Annotation Service**
+- **Stack:** Node.js + WebSocket + Prisma
+- **Responsibilities:**
+  - Drawing and timeline sync via WebSocket
+  - Save serialized annotation states (JSON)
+  - Broadcast annotation updates in real-time
+  - Replay system for annotation timelines
 
-### **3. Video Analysis & Drawing**
-- As a coach, I can pause the video and draw arrows, lines, and shapes.
-- As a user, I can toggle annotations on/off.
-- As a coach, I can save multiple drawings per frame.
-- As a coach, I can replay drawings during playback.
-- As a coach, I can scrub through the timeline and see annotations appear where relevant.
-- As a coach, I can use colors to represent offense/defense.
+#### **6. Clip & Tag Service**
+- **Stack:** Node.js + Prisma + PostgreSQL
+- **Responsibilities:**
+  - Create, tag, and categorize clips
+  - Manage metadata (formations, outcomes)
+  - Provide REST endpoints for clip search and filter
 
-### **4. Clip Creation & Tagging**
-- As a coach, I can select a time range and create a “clip”.
-- As a user, I can name and describe the clip.
-- As a coach, I can tag players involved in the clip.
-- As a coach, I can assign formations or situations to a clip.
-- As a player, I can comment on clips for discussion.
+#### **7. Comment & Collaboration Service**
+- **Stack:** Node.js + WebSocket + Prisma
+- **Responsibilities:**
+  - Timestamped comments and replies
+  - Threading and notifications
+  - Real-time collaboration sync
 
-### **5. Collaboration & Comments**
-- As a player, I can comment at a specific timestamp.
-- As a coach, I can reply to comments.
-- As a user, I can like or pin important comments.
-- As a coach, I can mark clips as “reviewed”.
+#### **8. Analytics Service**
+- **Stack:** Node.js + ClickHouse or PostgreSQL
+- **Responsibilities:**
+  - Track views, engagement, and clip interactions
+  - Generate per-player and team dashboards
+  - Periodic rollups and summaries
+- **Storage:** ClickHouse or PostgreSQL rollups
 
-### **6. Playbook Mode**
-- As a coach, I can save clips to my playbook.
-- As a user, I can browse categorized plays (Offense, Defense, Special Teams).
-- As a coach, I can export a play as an image or short video with annotations.
+#### **9. Job Queue / Worker Service**
+- **Stack:** BullMQ + Redis
+- **Responsibilities:**
+  - Background jobs (transcoding, analytics rollup)
+  - Retry logic and job scheduling
+  - Event relay between services
 
-### **7. Analytics**
-- As a coach, I can see which players watched which videos.
-- As a coach, I can track engagement per player (views, comments).
-- As a team admin, I can see overall clip stats (tags, formations, outcomes).
-
-### **8. Sharing & Permissions**
-- As a coach, I can share a video link only accessible by my team.
-- As a player, I can only access my team’s media.
-- As a coach, I can revoke access to clips.
-- As a coach, I can generate public share links (with expiration dates).
-
----
-
-## 🚀 Development Roadmap (Sprints)
-
-### **Sprint 1 – Foundation (Week 1–2)**
-- [ ] Set up Next.js 16 + TypeScript + Tailwind + Shadcn
-- [ ] Configure PostgreSQL + Prisma schema
-- [ ] Implement NextAuth with Google & Email
-- [ ] Set up AWS S3 for video uploads
-- [ ] Implement simple video upload & playback
-
-### **Sprint 2 – Teams & Permissions (Week 3–4)**
-- [ ] Team creation + invitation system
-- [ ] Role-based access (Coach / Player)
-- [ ] Team dashboard layout
-- [ ] Video categorization (Practice / Game)
-
-### **Sprint 3 – Video Player & Annotations (Week 5–6)**
-- [ ] Custom player (Video.js + Fabric.js / Konva.js)
-- [ ] Draw tools (lines, arrows, text, circles)
-- [ ] Annotation timeline syncing
-- [ ] Save/load annotations from DB
-
-### **Sprint 4 – Clips & Tagging (Week 7–8)**
-- [ ] Create and manage clips
-- [ ] Tag players and formations
-- [ ] Comment system (timestamp-based)
-- [ ] Real-time updates via WebSockets
-
-### **Sprint 5 – Playbook & Analytics (Week 9–10)**
-- [ ] Playbook creation (grouped clips)
-- [ ] Export clips as shareable media
-- [ ] Watch tracking (per-user)
-- [ ] Analytics dashboard (views, clips, engagement)
-
-### **Sprint 6 – Polish & Scale (Week 11–12)**
-- [ ] Optimize video transcoding with FFmpeg Lambda
-- [ ] Integrate CDN (CloudFront)
-- [ ] Implement caching with Next.js 16 React compiler
-- [ ] Add error logging & monitoring (Sentry)
-- [ ] Final responsive polish + testing
+#### **10. Notification Service (Optional)**
+- **Stack:** Node.js + WebSocket / Pusher / Firebase
+- **Responsibilities:**
+  - Send push and in-app notifications
+  - Integrate with email or SMS (e.g., SendGrid)
 
 ---
 
-## 🧰 Technologies Summary
+## 🔗 Communication Model
 
-| Area | Stack |
-|------|-------|
-| Frontend | Next.js 16, TypeScript, Tailwind, Shadcn, Zustand |
-| Backend | Prisma, Next.js Server Actions, PostgreSQL |
-| File Storage | AWS S3 |
-| Video Transcoding | AWS Lambda + FFmpeg |
-| Realtime | Pusher / WebSocket |
-| Auth | NextAuth.js |
-| Queue System | BullMQ / Cloudflare Queues |
-| Deployment | Vercel + AWS |
-| Analytics | PostgreSQL rollups / ClickHouse (optional) |
+| Type | Technology | Purpose |
+|------|-------------|----------|
+| **API Calls** | REST / GraphQL | Between Frontend and API Gateway |
+| **Events** | Redis Streams / NATS / Kafka | Between internal services |
+| **Real-Time** | WebSocket | Live annotations, comments, updates |
+| **Queue Jobs** | BullMQ (Redis) | Background tasks like transcoding |
+| **Auth Tokens** | JWT (signed by Auth service) | Secure inter-service communication |
 
 ---
 
-## 🧑‍💻 Future Ideas
-- AI auto-tagging (detect formations or players using ML)
-- Auto-clip detection based on motion or whistle detection
-- Mobile app for fast video uploads
-- Offline analysis mode
+## 🧰 Infrastructure Overview
+
+| Component | Provider / Tech |
+|------------|----------------|
+| **Frontend Hosting** | Vercel / Cloudflare Pages |
+| **API Gateway** | AWS Lambda / Cloudflare Workers |
+| **Microservices** | Docker containers on AWS ECS / Railway |
+| **Database** | PostgreSQL (RDS / Supabase) |
+| **Analytics DB** | ClickHouse |
+| **Object Storage** | AWS S3 (videos, thumbnails, exports) |
+| **CDN** | CloudFront / Cloudflare R2 |
+| **Job Queue** | Redis (Elasticache / Upstash) |
+| **Monitoring** | Sentry + Grafana + Loki |
+| **CI/CD** | GitHub Actions |
 
 ---
 
-## 🏗️ Drawing Technologies
+## 🧱 Directory Structure
 
-For reliable annotations across all screens:
-- **Konva.js** → Canvas-based, scalable drawings with serialization (recommended)
-- **SVG Overlay (custom)** → Perfect scaling on any device, ideal for static diagrams
-
-Save drawings as **JSON state objects**, and replay using video timestamps. This guarantees the same drawings appear across all devices and resolutions.
+```
+/openhudle
+├── /apps
+│   ├── /frontend             # Next.js app
+│   ├── /gateway              # API Gateway
+│   └── /admin-dashboard      # (Optional) Management interface
+│
+├── /services
+│   ├── auth-service
+│   ├── media-service
+│   ├── annotation-service
+│   ├── clip-tag-service
+│   ├── comment-service
+│   ├── analytics-service
+│   ├── job-service
+│   └── notification-service
+│
+├── /packages
+│   ├── prisma-schema         # Shared DB schema
+│   ├── types                 # Shared TypeScript interfaces
+│   ├── utils                 # Common utilities
+│   ├── config                # Shared configs (env, constants)
+│
+├── /infra
+│   ├── docker-compose.yml
+│   ├── terraform/            # IaC for AWS setup
+│   ├── k8s/                  # Optional Kubernetes configs
+│
+└── README.md
+```
 
 ---
 
+## 🚀 Development Sprints
+
+| Sprint | Focus | Services |
+|--------|--------|-----------|
+| **Sprint 1** | Foundation | Frontend setup, API Gateway, Auth service |
+| **Sprint 2** | Video upload pipeline | Media service, S3, transcoding |
+| **Sprint 3** | Annotations + Real-time | Annotation service + WebSocket infra |
+| **Sprint 4** | Clips & Tags | Clip-tag service + frontend integration |
+| **Sprint 5** | Collaboration | Comment + Notification services |
+| **Sprint 6** | Analytics + Optimization | Analytics + caching + observability |
+| **Sprint 7** | Polish & Release | UX refinements, monitoring, docs |
+
+---
+
+## 🧠 Drawing Layer Technology
+
+| Component | Library | Description |
+|------------|----------|-------------|
+| **Canvas Layer** | Konva.js | Vector-based drawing and animations |
+| **Serialization** | JSON | Stores drawings as objects for replay |
+| **Reproduction** | Time-synced re-rendering | Ensures consistent drawing playback |
+| **Future Option** | Fabric.js / SVG Overlay | Scalable, resolution-independent rendering |
+
+---
+
+## 🧑‍💻 Future Expansion
+
+- AI-assisted tagging (pose & player detection)
+- Voice annotations
+- Mobile upload companion app
+- Offline annotation playback
+- Live game streaming + instant review
+
+---
+
+## ⚡ Why Microservices?
+
+✅ **Scalable:** Each service can scale independently.  
+✅ **Maintainable:** Clear ownership and smaller deployable units.  
+✅ **Performant:** Decouple video processing from the main app.  
+✅ **Future-proof:** Easier to integrate ML and analytics down the line.  
+✅ **Flexible:** Choose the best tools per service (e.g., Go for video if needed).  
+
+---
+
+## 🧩 Technologies Summary
+
+| Area | Tech Stack |
+|------|-------------|
+| **Frontend** | Next.js 16, TypeScript, Tailwind, Shadcn, Zustand |
+| **Auth** | Fastify, Prisma, PostgreSQL |
+| **Media** | AWS S3, FFmpeg, Lambda |
+| **Annotations** | Konva.js, WebSocket, Prisma |
+| **Clips/Tags** | Node.js, Prisma |
+| **Analytics** | ClickHouse / PostgreSQL |
+| **Infra** | Docker, Redis, GitHub Actions, AWS ECS, Terraform |
+| **Monitoring** | Sentry, Grafana, Loki |
+
+---
+
+## 🧱 Summary
+
+OpenHudle is a **modular, distributed video analysis platform** that brings Hudl-level power to teams everywhere.  
+Designed with **Next.js 16**, **microservices**, and **modern cloud-native principles**, it’s scalable, hackable, and built for the long run.
+
+---
+
+> 🧑‍💻 Built by developers, for athletes.
+>  
+> ⚙️ _“Control your footage. Own your analysis.”_
